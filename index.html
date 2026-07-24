@@ -180,15 +180,15 @@ function SimplePieChart({ data, size = 170 }) {
 /*  GRADING LOGIC (Zambian ECZ-style 9-point scale)                    */
 /* ------------------------------------------------------------------ */
 const GRADE_BANDS = [
-    { min: 90, max: 100, point: 1, label: "Distinction" },
-    { min: 80, max: 89, point: 2, label: "Distinction" },
-    { min: 70, max: 79, point: 3, label: "Merit" },
-    { min: 60, max: 69, point: 4, label: "Merit" },
-    { min: 50, max: 59, point: 5, label: "Credit" },
-    { min: 40, max: 49, point: 6, label: "Credit" },
-    { min: 30, max: 39, point: 7, label: "Satisfactory" },
-    { min: 20, max: 29, point: 8, label: "Satisfactory" },
-    { min: 0, max: 19, point: 9, label: "Unsatisfactory" },
+    { min: 75, max: 100, point: 1, label: "Distinction" },
+    { min: 70, max: 74, point: 2, label: "Distinction" },
+    { min: 65, max: 69, point: 3, label: "Merit" },
+    { min: 60, max: 64, point: 4, label: "Merit" },
+    { min: 55, max: 59, point: 5, label: "Credit" },
+    { min: 50, max: 54, point: 6, label: "Credit" },
+    { min: 45, max: 49, point: 7, label: "Satisfactory" },
+    { min: 40, max: 44, point: 8, label: "Satisfactory" },
+    { min: 0, max: 39, point: 9, label: "Unsatisfactory" },
 ];
 const PASS_MARK = 40;
 function getGrade(score) {
@@ -374,7 +374,7 @@ function Modal({ title, onClose, children, width = 480 }) {
 /* ------------------------------------------------------------------ */
 function AuthScreen({ onAuth, notify }) {
     const [mode, setMode] = useState("login");
-    const [form, setForm] = useState({ username: "", password: "", fullName: "", school: "" });
+    const [form, setForm] = useState({ username: "", password: "", fullName: "Quincy Ng'ambi", school: "Munyumbwe Sec" });
     const [busy, setBusy] = useState(false);
     const submit = (e) => {
         e.preventDefault();
@@ -426,9 +426,9 @@ function AuthScreen({ onAuth, notify }) {
                 React.createElement("form", { onSubmit: submit },
                     mode === "signup" && (React.createElement(React.Fragment, null,
                         React.createElement(Field, { label: "Full name" },
-                            React.createElement("input", { style: inputStyle, value: form.fullName, onChange: (e) => setForm({ ...form, fullName: e.target.value }), placeholder: "e.g. Mutale Banda" })),
+                            React.createElement("input", { style: inputStyle, value: form.fullName, onChange: (e) => setForm({ ...form, fullName: e.target.value }), placeholder: "e.g. Quincy Ng'ambi" })),
                         React.createElement(Field, { label: "School (optional)" },
-                            React.createElement("input", { style: inputStyle, value: form.school, onChange: (e) => setForm({ ...form, school: e.target.value }), placeholder: "e.g. Kabulonga Girls Secondary" })))),
+                            React.createElement("input", { style: inputStyle, value: form.school, onChange: (e) => setForm({ ...form, school: e.target.value }), placeholder: "e.g. Munyumbwe Sec" })))),
                     React.createElement(Field, { label: "Username" },
                         React.createElement("input", { style: inputStyle, value: form.username, onChange: (e) => setForm({ ...form, username: e.target.value }), placeholder: "e.g. mbanda", autoCapitalize: "none" })),
                     React.createElement(Field, { label: "Password" },
@@ -536,11 +536,12 @@ function Dashboard({ sheets, openSheet, onNewSheet, deleteSheet }) {
 /* ------------------------------------------------------------------ */
 function NewSheetModal({ onClose, onCreate }) {
     const [f, setF] = useState({ title: "", className: "", term: "Term 1", year: String(new Date().getFullYear()) });
+    const submit = () => f.title.trim() && onCreate(f);
     return (React.createElement(Modal, { title: "New Grade Sheet", onClose: onClose },
         React.createElement(Field, { label: "Sheet title" },
-            React.createElement("input", { style: inputStyle, value: f.title, onChange: (e) => setF({ ...f, title: e.target.value }), placeholder: "e.g. Grade 9B Mid-Term Results" })),
+            React.createElement("input", { style: inputStyle, value: f.title, onChange: (e) => setF({ ...f, title: e.target.value }), onKeyDown: (e) => e.key === "Enter" && submit(), placeholder: "e.g. Grade 9B Mid-Term Results" })),
         React.createElement(Field, { label: "Class" },
-            React.createElement("input", { style: inputStyle, value: f.className, onChange: (e) => setF({ ...f, className: e.target.value }), placeholder: "e.g. Grade 9B" })),
+            React.createElement("input", { style: inputStyle, value: f.className, onChange: (e) => setF({ ...f, className: e.target.value }), onKeyDown: (e) => e.key === "Enter" && submit(), placeholder: "e.g. Grade 9B" })),
         React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 } },
             React.createElement(Field, { label: "Term" },
                 React.createElement("select", { style: inputStyle, value: f.term, onChange: (e) => setF({ ...f, term: e.target.value }) },
@@ -549,7 +550,7 @@ function NewSheetModal({ onClose, onCreate }) {
                     React.createElement("option", null, "Term 3"))),
             React.createElement(Field, { label: "Year" },
                 React.createElement("input", { style: inputStyle, value: f.year, onChange: (e) => setF({ ...f, year: e.target.value }) }))),
-        React.createElement(Btn, { style: { width: "100%", justifyContent: "center", marginTop: 6 }, onClick: () => f.title.trim() && onCreate(f) }, "Create Sheet")));
+        React.createElement(Btn, { style: { width: "100%", justifyContent: "center", marginTop: 6 }, onClick: submit }, "Create Sheet")));
 }
 /* ------------------------------------------------------------------ */
 /*  SHEET EDITOR                                                        */
@@ -561,7 +562,7 @@ function SheetEditor({ sheet, update, onBack, setTab, tab }) {
     const [newStudent, setNewStudent] = useState("");
     const addSubject = () => {
         const name = newSubject.trim();
-        if (!name || sheet.subjects.includes(name))
+        if (!name || sheet.subjects.some((x) => x.toLowerCase() === name.toLowerCase()))
             return;
         update((s) => ({
             ...s, subjects: [...s.subjects, name],
@@ -586,7 +587,14 @@ function SheetEditor({ sheet, update, onBack, setTab, tab }) {
     };
     const removeStudent = (id) => update((s) => ({ ...s, students: s.students.filter((st) => st.id !== id) }));
     const setScore = (id, subject, val) => {
-        const num = val === "" ? null : Math.max(0, Math.min(100, Number(val)));
+        if (val === "") {
+            update((s) => ({ ...s, students: s.students.map((st) => st.id === id ? { ...st, scores: { ...st.scores, [subject]: null } } : st) }));
+            return;
+        }
+        const n = Number(val);
+        if (isNaN(n))
+            return;
+        const num = Math.max(0, Math.min(100, n));
         update((s) => ({ ...s, students: s.students.map((st) => st.id === id ? { ...st, scores: { ...st.scores, [subject]: num } } : st) }));
     };
     const setRemark = (id, text) => update((s) => ({ ...s, students: s.students.map((st) => st.id === id ? { ...st, remark: text } : st) }));
@@ -952,4 +960,4 @@ root.render(React.createElement(App, null));
 
 </script>
 </body>
-</html>
+  </html>
